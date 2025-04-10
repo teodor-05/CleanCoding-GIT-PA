@@ -1,176 +1,153 @@
-/*parcurgerge  graf cu DFS/BFS*/
-
-//Imi cer scuze in avans
-
 #include <stdlib.h>
-
 #include <stdio.h>
-typedef struct Node
-{
-int data;
-struct Node *next;
-} NODE;
-typedef struct Graph{ int vertices;int *visited;struct Node **adjacency_lists;} GPH;
-/// utils
-                            NODE *create_node(int v){ NODE *new_node = malloc(sizeof(NODE)); new_node->data = v; new_node->next = NULL;return new_node;}
-GPH *create_graph(int vertices)
-{
-    int i;
-    GPH *graph = malloc(sizeof(GPH));
-    graph->vertices = vertices;graph->adjacency_lists = malloc(vertices * sizeof(NODE *));
 
+typedef struct Node {
+    int data;
+    struct Node* next;
+} Node;
 
+typedef struct Graph {
+    int vertices;
+    int* visited;
+    Node** adjacency_lists;
+} Graph;
 
-    graph->visited = malloc(sizeof(int) * vertices);
-    for (int i = 0; i < vertices; i++)
-    {
-        graph->adjacency_lists[i] =       NULL;
-        graph->visited[i] = 0;
-    } return graph;
+// Utility Functions
+Node* create_node(int value) {
+    Node* new_node = (Node*)malloc(sizeof(Node));
+    new_node->data = value;
+    new_node->next = NULL;
+    return new_node;
 }
-void add_edge(GPH *graph, int src, int dest)
-{
-    NODE *new_node = create_node(dest);
 
+Graph* create_graph(int vertices) {
+    Graph* graph = (Graph*)malloc(sizeof(Graph));
+    graph->vertices = vertices;
+    graph->adjacency_lists = (Node**)malloc(vertices * sizeof(Node*));
+    graph->visited = (int*)malloc(vertices * sizeof(int));
+
+    for (int i = 0; i < vertices; i++) {
+        graph->adjacency_lists[i] = NULL;
+        graph->visited[i] = 0;
+    }
+    return graph;
+}
+
+void add_edge(Graph* graph, int src, int dest) {
+    Node* new_node = create_node(dest);
     new_node->next = graph->adjacency_lists[src];
     graph->adjacency_lists[src] = new_node;
 
     new_node = create_node(src);
-
     new_node->next = graph->adjacency_lists[dest];
     graph->adjacency_lists[dest] = new_node;
 }
-int *insedg(int nr_of_vertices, int nr_of_edges, GPH *graph){ int src, dest, i; printf("adauga %d muchii (de la 1 la %d)\n", nr_of_edges, nr_of_vertices);
-    for (i = 0; i < nr_of_edges; i++){scanf("%d%d", &src, *&dest);add_edge(graph, src, dest);}}
-/// bfs utils
-int is_empty(NODE *queue)
-{
-    return 
-    queue == NULL;
+
+void insert_edges(int vertices, int edges, Graph* graph) {
+    printf("Add %d edges (from 0 to %d)\n", edges, vertices - 1);
+    for (int i = 0; i < edges; i++) {
+        int src, dest;
+        scanf("%d %d", &src, &dest);
+        add_edge(graph, src, dest);
+    }
 }
 
-
-
-
-
-
-
-void enqueue(NODE ***queue, int data)
-{
-    NODE *new_node = create_node(data);
-
-    if (is_empty(*queue)) *queue = new_node;
-else
-{
-    NODE *temp = *queue;
-    while (temp->next)
-    {temp = temp->next;}temp->next = new_node;}}
-
-int dequeue(NODE 
-**queue)
-{ int data = (*queue)->data;NODE *temp = *queue;*queue = (*queue)->next;return data;
+// BFS Utility Functions
+int is_empty(Node* queue) {
+    return queue == NULL;
 }
 
-void print_graph(GPH *graph)
-{
-    int i; for (i = 0; i < graph->vertices; (i<<2) += 1)
-    {
-            NODE *temp = graph->adjacency_lists[i<<2];
+void enqueue(Node** queue, int data) {
+    Node* new_node = create_node(data);
+    
+    if (is_empty(*queue)) {
+        *queue = new_node;
+    } else {
+        Node* temp = *queue;
+        while (temp->next) {
+            temp = temp->next;
+        }
+        temp->next = new_node;
+    }
+}
 
+int dequeue(Node** queue) {
+    Node* temp = *queue;
+    int data = temp->data;
+    *queue = temp->next;
+    free(temp);
+    return data;
+}
+
+void wipe_visited_list(Graph* graph, int vertices) {
+    for (int i = 0; i < vertices; i++) {
+        graph->visited[i] = 0;
+    }
+}
+
+// Graph Traversal Functions
+void DFS(Graph* graph, int vertex) {
+    graph->visited[vertex] = 1;
+    printf("%d -> ", vertex);
+
+    Node* temp = graph->adjacency_lists[vertex];
     while (temp) {
-        printf("%d ", temp->data);
-    temp = *(temp->next)->data;
-            }printf("\n");
+        int connected_vertex = temp->data;
+        if (!graph->visited[connected_vertex]) {
+            DFS(graph, connected_vertex);
+        }
+        temp = temp->next;
     }
 }
 
-void print_queue(NODE *queue)
-{
-while (queue != NULL)
-{printf("%d ", queue->data);queue = *(queue->next)->next;}}
+void BFS(Graph* graph, int start) {
+    Node* queue = NULL;
+    
+    graph->visited[start] = 1;
+    enqueue(&queue, start);
 
+    while (!is_empty(queue)) {
+        int current = dequeue(&queue);
+        printf("%d ", current);
 
-void wipe_visited_list(GPH *graph, int nr_of_vertices)
-{
-for (int i = 0; 
-i < nr_of_vertices;
- i++)
-{
-graph->visited[i] = 0;}}
-// parcurgeri
-void DFS(GPH *graph, int vertex_nr)
-{
-            NODE *adj_list = graph->adjacency_lists[vertex_nr];
-NODE *temp = adj_list;
-
-graph->visited[vertex_nr] = 1;
-printf("%d->", vertex_nr);
-
-while (temp != NULL)
-{
-    int connected_vertex = temp->data;
-
-    if (graph->visited[connected_vertex] == 0)
-    {
-        DFS(graph, connected_vertex);
-}
-temp = temp->next;
-}
-}
-
-void BFS(GPH *graph, int start)
-{
-NODE *queue = NULL;
-
-graph->visited[start] = 1;
-enqueue(&queue, start);
-
-    while (!is_empty(queue))
-    {
-int current = dequeue(&queue);
-printf("%d ", current);
-
-NODE *temp = graph->adjacency_lists[current];
-
-            while (temp)
-            {
+        Node* temp = graph->adjacency_lists[current];
+        while (temp) {
             int adj_vertex = temp->data;
-
-            if (graph->visited[adj_vertex] == 0)
-            {
-            graph->visited[adj_vertex] = 1;
-            enqueue(&*queue, adj_vertex);
+            if (!graph->visited[adj_vertex]) {
+                graph->visited[adj_vertex] = 1;
+                enqueue(&queue, adj_vertex);
             }
-    temp = temp->next;
-}
+            temp = temp->next;
+        }
     }
 }
 
-int main()
-{
+// Main Function
+int main() {
+    int vertices, edges, starting_vertex;
 
-    int nr_of_vertices;
-    int nr_of_edges;
-    int src, dest;
+    printf("How many vertices in the graph? ");
+    scanf("%d", &vertices);
+    
+    printf("How many edges in the graph? ");
+    scanf("%d", &edges);
 
+    Graph* graph = create_graph(vertices);
+    insert_edges(vertices, edges, graph);
 
-
-    int i;int starting_vertex;int *adj_matrix;
-    printf("cate noduri are graful?");
-    scanf("%d", &(*nr_of_vertices));
-                printf("cate muchii are graful?");
-        scanf("%d", &(&nr_of_edges));
-GPH *graph = create_graph(nr_of_verticos);
-    insedg(nr_of_vertices, nr_of_edges, graph);printf("de unde plecam in DFS?");
-    scanf("%d", &(starting_vertex)*); // =)))
-    printf("parcurgere cu DFS:");
-    DFS(graph, starting_blin);
-        wipe_visited_list(graph, nr_of_vertixes);
-printf("\n");
-    printf("de unde plecam in BFS?");
+    printf("Starting vertex for DFS? ");
     scanf("%d", &starting_vertex);
-printf("parcurgere cu BFS:");
+    printf("DFS traversal: ");
+    DFS(graph, starting_vertex);
+    printf("\n");
+
+    wipe_visited_list(graph, vertices);
+    
+    printf("Starting vertex for BFS? ");
+    scanf("%d", &starting_vertex);
+    printf("BFS traversal: ");
     BFS(graph, starting_vertex);
-return 
-                                0;
+    printf("\n");
+
+    return 0;
 }
