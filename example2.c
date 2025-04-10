@@ -61,7 +61,7 @@ void insert_edges(int vertices, int edges, Graph* graph) {
     printf("Adauga %d muchii (de la 0 la %d):\n", edges, vertices - 1);
     for (int i = 0; i < edges; i++) {
         int src, dest;
-        printf("Muchia %d (src dest): ", i + 1);
+        printf("Muchia %d : ", i + 1);
         if (scanf("%d %d", &src, &dest) != 2) {
             printf("Eroare citire muchie!\n");
             exit(1);
